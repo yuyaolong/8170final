@@ -23,7 +23,7 @@
 #define Cl 0.5
 
 #define Ksita 0.4
-#define Dsita 0.05
+#define Dsita 0.1
 
 #define SITA0 PI
 #define EPSILON  0.000001
@@ -151,7 +151,7 @@ void fireWorkGenerator(Vector3d center, unsigned int number)
 {
     Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
     for (int i = 0; i<number; i++) {
-        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 2, 1),gauss(0, 2, 1),gauss(0, 2, 1)), Vector3d(0,0,0), color, 1, 0, 2, false,"firework"));
+        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 5, 1),gauss(0, 5, 1),gauss(0, 5, 1)), Vector3d(0,0,0), color, 1, 0, 2, false,"firework"));
         
     }
 }
@@ -160,7 +160,7 @@ void fireWorkGenerator(Vector3d center, unsigned int number)
 void traceGenerator(Vector3d center, unsigned int number)
 {
     for (int i = 0; i<number; i++) {
-        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 0.2, 1),gauss(0, 0.2, 1),gauss(0, 0.2, 1)), Vector3d(0,0,0), Vector4d(0.3,0.3,0.3,0), 1, 0, 2, false,"trace"));
+        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 0.2, 1),gauss(0, 0.2, 1),gauss(0, 0.2, 1)), Vector3d(0,0,0), Vector4d(0.3,0.3,0.3,0), 1, 0, 2, false,"traces"));
         
     }
 }
@@ -763,7 +763,7 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
         
         
         
-        if ( particles[i].getVelocity().norm() <1  || particles[i].getVelocity().norm() >5) {
+        if ( particles[i].getVelocity().norm() <1  || particles[i].getVelocity().norm() >8) {
              particles[i].setStopSign(true);
         }
         
@@ -776,7 +776,7 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
         if (particles[i].getName() == "trace") {
             
             traceGenerator(particles[i].getPosition(), 20);
-            if ((particles[i].getPosition() - flockCenter).norm() < 0.7 ) {
+            if ((particles[i].getPosition() - flockCenter).norm() < 1 ) {
                 explode = true;
                 particles[i].setName("chaos");
                 fireWorkGenerator(particles[i].getPosition(), 2000);
@@ -791,10 +791,13 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
         
         for (int i=0; i<pNum; i++) {
             if ( particles[i].getStopSign()) {
+                
+                if (particles[i].getName() != "trace") {
+                    particles[i].setStopSign(false);
+                }
                 Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
                 Vector3d tmp = particles[i].getVelocity();
-                particles[i].setVelocity(Vector3d(tmp.x+gauss(0, 3, 1), tmp.y+gauss(0, 3, 1), tmp.z+gauss(0, 3, 1)));
-                particles[i].setStopSign(false);
+                particles[i].setVelocity(Vector3d(tmp.x+gauss(0, 2, 1), tmp.y+gauss(0, 2, 1), tmp.z+gauss(0, 2, 1)));
                 particles[i].setColor(color);
                 
             }
@@ -832,7 +835,7 @@ void firewordUpdate(const unsigned int pNum, const calcuState state)
         
         float speedLimit = 0.2;
         if (ptr->getName() == "firework") {
-            speedLimit = 1.5;
+            speedLimit = 2;
         }
         else
         {
@@ -882,6 +885,8 @@ void timeProc(int id)
 
 void handleKey(unsigned char key, int x, int y){
     unsigned int t = gauss(VERTEXNUMBER/2, VERTEXNUMBER/6, 1);
+    unsigned int n = rand()%VERTEXNUMBER;
+    
     switch(key){
         case 'a':
         case 'A':
@@ -921,8 +926,8 @@ void handleKey(unsigned char key, int x, int y){
             
         case 'z':
         case 'Z':
-           
-            particles.push_back( Particle(Vector3d(-10,gauss(7, 1, 1),gauss(0, 2, 1)), Vector3d(gauss(2.5, 0.5, 1),2,0), Vector3d(0,0,0), Vector4d(0,0.5,0.2,1), 1, 0, particleSize, true, "trace") );
+            
+            particles.push_back( Particle(springMesh.points[n].xposition, Vector3d(gauss(2.5, 0.5, 1),2,0), Vector3d(0,0,0), Vector4d(0,0.5,0.2,1), 1, 0, particleSize, true, "trace") );
             break;
             
         case 'm':
