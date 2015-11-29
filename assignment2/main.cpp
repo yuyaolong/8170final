@@ -45,20 +45,19 @@ SpringMesh springMesh;
 unsigned int windCount = 0;
 Vector3d gravity(0,0,0);
 
-
-
 //particle thing
-int ParticleNum = 200;
-float particleSize = 0.1;
+int ParticleNum = 150;
+float particleSize = 0.2;
 std::vector<Particle>particles;
 Vector3d circleCenterPosition(0,6,0);
 
-
+std::vector<Particle>fireWorks;
 
 enum calcuState
 {
     SPRINGCAL=0,
-    PARTICLECAL
+    PARTICLECAL,
+    FIREWORKCAL
 };
 
 
@@ -148,6 +147,23 @@ void particlesGenerator(int number)
     
 }
 
+void fireWorkGenerator(Vector3d center, unsigned int number)
+{
+    Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
+    for (int i = 0; i<number; i++) {
+        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 2, 1),gauss(0, 2, 1),gauss(0, 2, 1)), Vector3d(0,0,0), color, 1, 0, 2, false,"firework"));
+        
+    }
+}
+
+
+void traceGenerator(Vector3d center, unsigned int number)
+{
+    for (int i = 0; i<number; i++) {
+        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 0.2, 1),gauss(0, 0.2, 1),gauss(0, 0.2, 1)), Vector3d(0,0,0), Vector4d(0.3,0.3,0.3,0), 1, 0, 2, false,"trace"));
+        
+    }
+}
 
 void myDisplay(void)
 {
@@ -235,15 +251,12 @@ void myDisplay(void)
         }
         
         
-        
     }
     
     
     
     //particle
     for (int i = 0; i < particles.size(); ++i) {
-       
-        
         if (particles[i].getStopSign() == false) {
             GLfloat mat_ambient[]  = {0, 0.2, 0.5, 1.0f};
             GLfloat mat_diffuse[]  = {0, 0.2, 0.5, 1.0f};
@@ -281,12 +294,36 @@ void myDisplay(void)
         glTranslatef(particles[i].getPosition().x, particles[i].getPosition().y, particles[i].getPosition().z);
         glutSolidSphere(particleSize, 10, 10);
         glPopMatrix();
-        
-        
-        
-
-
     }
+    
+    
+    //firework
+
+    if (fireWorks.size() > 0) {
+        for (int i = 0; i < fireWorks.size(); ++i) {
+            float r=fireWorks[i].getColor().x;
+            float g=fireWorks[i].getColor().y;
+            float b=fireWorks[i].getColor().z;
+            float al=fireWorks[i].getColor().w;
+            
+            GLfloat mat_ambient[]  = {r, g, b, al};
+            GLfloat mat_diffuse[]  = {r, g, b, al};
+            GLfloat mat_specular[] = {r, g, b, al};
+            GLfloat mat_emission[] = {r, g, b, al};
+            GLfloat mat_shininess  = 8.0f;
+            glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
+            glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
+            glMaterialfv(GL_FRONT, GL_EMISSION,  mat_emission);
+            glMaterialf (GL_FRONT, GL_SHININESS, mat_shininess);
+            
+            glPointSize(fireWorks[i].getPointSize());
+            glBegin(GL_POINTS);
+            glVertex3f(fireWorks[i].getPosition().x, fireWorks[i].getPosition().y, fireWorks[i].getPosition().z);
+            glEnd();
+        }
+    }
+    
     
     glFlush();
     glutSwapBuffers();
@@ -310,9 +347,9 @@ float mini(float a, float b)
 
 void flockAcceleration(std::vector<Vector3d>& states, std::vector<Vector3d>& statesA, unsigned int BOIDNUMBER)
 {
-    double KA = 0.05;
-    double KV = 0.01;
-    double KC = 0.02;
+    double KA = gauss(0.05, 0.01, 1);
+    double KV = gauss(0.003, 0.001, 1);
+    double KC = gauss(0.02, 0.007, 1);
     double R1 = 8;
     double R2 = 20;
     double AMAX = 0.1;
@@ -476,6 +513,19 @@ std::vector<Vector3d> sysDynaFunc(std::vector<Vector3d>& states, const unsigned 
         }
         flockAcceleration(states, statesA, pNum);
         
+    }
+    
+    if (state == FIREWORKCAL) {
+        for (int i=0; i<pNum; i++) {
+            statesA[i] = states[i+pNum];
+            
+            
+            Vector3d Xai = states[i] - circleCenterPosition;
+            double distance  = Xai.norm();
+            Vector3d particleAcceleration((-0.001 * (distance*distance))*Xai);
+
+            statesA[i+pNum] = states[i+pNum]*-0.1 + particleAcceleration;
+        }
     }
     
     
@@ -691,12 +741,19 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
     
     
     unsigned int flockCounter = 0;
-    for (int i=0; i<pNum; i++) {
-        
+    Vector3d flockCenter(0,0,0);
+    for (int i=0; i<pNum; i++)
+    {
         if (particles[i].getStopSign() == true) {
-            flockCounter++;;
+            flockCounter++;
+            flockCenter = flockCenter + particles[i].getPosition();
         }
-        
+
+    }
+    flockCenter = flockCenter / flockCounter;
+    
+    
+    for (int i=0; i<pNum; i++) {
         particles[i].setPosition(vertexStatesNew[i]);
         particles[i].setVelocity(vertexStatesNew[i+pNum]);
         if (particles[i].getPosition().y<-10) {
@@ -711,8 +768,20 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
         }
         
         
-        if (flockCounter > pNum*1.0/2) {
-            explode = true;
+//        if (flockCounter > pNum*1.0/2) {
+//            explode = true;
+//            fireWorkGenerator(particles[i].getPosition(), 100);
+//        }
+        
+        if (particles[i].getName() == "trace") {
+            
+            traceGenerator(particles[i].getPosition(), 20);
+            if ((particles[i].getPosition() - flockCenter).norm() < 0.7 ) {
+                explode = true;
+                particles[i].setName("chaos");
+                fireWorkGenerator(particles[i].getPosition(), 2000);
+            }
+            
         }
         
     }
@@ -724,15 +793,59 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
             if ( particles[i].getStopSign()) {
                 Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
                 Vector3d tmp = particles[i].getVelocity();
-                particles[i].setVelocity(Vector3d(tmp.x+gauss(0, 5, 1), tmp.y+gauss(0, 5, 1), tmp.z+gauss(0, 5, 1)));
+                particles[i].setVelocity(Vector3d(tmp.x+gauss(0, 3, 1), tmp.y+gauss(0, 3, 1), tmp.z+gauss(0, 3, 1)));
                 particles[i].setStopSign(false);
                 particles[i].setColor(color);
+                
             }
+            
             
         }
         explode = false;
     }
     
+    
+}
+
+
+void firewordUpdate(const unsigned int pNum, const calcuState state)
+{
+    
+    std::vector<Vector3d>vertexStates(pNum*2);
+    std::vector<Vector3d>vertexStatesNew(pNum*2);
+    std::vector<Vector3d>vertexStatesA(pNum*2);
+    for (int i=0; i<pNum; i++) {
+        vertexStates[i] = fireWorks[i].getPosition();
+        vertexStates[i+pNum] = fireWorks[i].getVelocity();
+    }
+    
+   statesNumInt(vertexStates, vertexStatesNew, vertexStatesA, pNum, state);
+    
+   for (int i=0; i<pNum; i++) {
+       fireWorks[i].setPosition(vertexStatesNew[i]);
+       fireWorks[i].setVelocity(vertexStatesNew[i+pNum]);
+   }
+    
+    
+    std::vector<Particle>::iterator ptr = fireWorks.begin();
+    while (ptr != fireWorks.end()) {
+        
+        float speedLimit = 0.2;
+        if (ptr->getName() == "firework") {
+            speedLimit = 1.5;
+        }
+        else
+        {
+            speedLimit = 0.5;
+        }
+
+        if ((ptr->getVelocity()).norm() < speedLimit ) {
+            ptr = fireWorks.erase(ptr);
+        }
+        else
+            ptr++;
+        
+    }
     
 }
 
@@ -745,13 +858,17 @@ void timeProc(int id)
 {
     if (id == 1) {
         
+        springUpdate(VERTEXNUMBER, SPRINGCAL);
+        
         if (particles.size()<ParticleNum) {
             particlesGenerator(1);
         }
         particlesUpdate(particles.size(), PARTICLECAL);
     
-        springUpdate(VERTEXNUMBER, SPRINGCAL);
         
+        if (fireWorks.size() > 0) {
+            firewordUpdate(fireWorks.size(), FIREWORKCAL);
+        }
         
 
         
@@ -796,14 +913,18 @@ void handleKey(unsigned char key, int x, int y){
                     
                 }
             }
-
             break;
-    
-            
         case 'g':
         case 'G':
-            gravity = Vector3d(0,-2,0);
+            fireWorkGenerator(circleCenterPosition, 100);
             break;
+            
+        case 'z':
+        case 'Z':
+           
+            particles.push_back( Particle(Vector3d(-10,gauss(7, 1, 1),gauss(0, 2, 1)), Vector3d(gauss(2.5, 0.5, 1),2,0), Vector3d(0,0,0), Vector4d(0,0.5,0.2,1), 1, 0, particleSize, true, "trace") );
+            break;
+            
         case 'm':
         case 'M':
             showGrid = !showGrid;
@@ -872,6 +993,7 @@ void init() {
 
     
     particles.reserve(ParticleNum);
+    fireWorks.reserve(100000);
     srand (time(NULL));
     
 }
