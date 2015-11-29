@@ -8,7 +8,7 @@
 
 #include "Point.h"
 
-Point::Point(double m, Vector3d x, Vector3d v, Vector3d f):
-                                    mass(m),xposition(x),velocity(v),force(f)
+Point::Point(double m, Vector3d x, Vector3d v, Vector3d f ,Vector2d t):
+                                    mass(m),xposition(x),velocity(v),force(f),textureCoordinate(t)
 {
 }

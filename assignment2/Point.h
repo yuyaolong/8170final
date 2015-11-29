@@ -18,7 +18,9 @@ public:
     Vector3d velocity;
     Vector3d force;
     
-    Point(double m, Vector3d x, Vector3d v, Vector3d f);
+    Vector2d textureCoordinate;
+    
+    Point(double m, Vector3d x, Vector3d v, Vector3d f, Vector2d t);
     
 private:
     Point();

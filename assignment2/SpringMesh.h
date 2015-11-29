@@ -15,7 +15,7 @@
 #include "Face.h"
 #include "Point.h"
 
-#define EDGELENGTH 1.2
+#define EDGELENGTH 1
 #define LINES 30
 #define ROWS 30
 

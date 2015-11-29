@@ -1,11 +1,15 @@
 #ifdef __APPLE__
-#  include <GLUT/glut.h>
+#include <GLUT/glut.h>
+
+#include <OpenGL/gl.h>
 #else
-#  include <GL/glut.h>
+#include <GL/glut.h>
 #endif
 
 #include <cmath>
 #include <vector>
+#include "neheTGATexture.h"
+
 #include"Vector.h"
 #include "Camera.h"
 #include "SpringMesh.h"
@@ -53,12 +57,16 @@ Vector3d circleCenterPosition(0,6,0);
 
 std::vector<Particle>fireWorks;
 
+
+imageTGA texture;
+
 enum calcuState
 {
     SPRINGCAL=0,
     PARTICLECAL,
     FIREWORKCAL
 };
+
 
 
 // draws a simple grid
@@ -128,8 +136,6 @@ void motionEventHandler(int x, int y) {
     glutPostRedisplay();
 }
 
-
-
 double calAngle(Vector3d& a, Vector3d& b)
 {
     return acos(a.normalize() * b.normalize())*180/PI;
@@ -165,6 +171,31 @@ void traceGenerator(Vector3d center, unsigned int number)
     }
 }
 
+
+
+int DrawCube(void)
+
+{
+    glBindTexture(GL_TEXTURE_2D, texture.getId());        //使用贴图纹理
+    glPushMatrix();        //压入变换矩阵
+    glBegin(GL_QUADS);  //启用四边形带绘制模式绘制
+ 
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
+    
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
+    
+    glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
+    
+    glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
+
+    glEnd();
+    
+    glPopMatrix(); //弹出变换矩阵
+    
+    return 1;
+    
+}
+
 void myDisplay(void)
 {
     
@@ -184,9 +215,9 @@ void myDisplay(void)
      
     //spring mesh
     GLfloat ball_mat_ambient[]  = {0.0f, 0.0f, 0.0f, 1.0f};
-    GLfloat ball_mat_diffuse[]  = {0.8f, 0.4f, 1.0f, 1.0f};
+    GLfloat ball_mat_diffuse[]  = {0.4f, 0.2f, 0.5f, 1.0f};
     GLfloat ball_mat_specular[] = {0.4f, 0.2f, 0.5f, 1.0f};
-    GLfloat ball_mat_emission[] = {0.4f, 0.2f, 0.5f, 1.0f};
+    GLfloat ball_mat_emission[] = {0.8f, 0.4f, 1.0f, 1.0f};
     GLfloat ball_mat_shininess  = 8.0f;
     
     glMaterialfv(GL_FRONT, GL_AMBIENT,   ball_mat_ambient);
@@ -196,25 +227,25 @@ void myDisplay(void)
     glMaterialf (GL_FRONT, GL_SHININESS, ball_mat_shininess);
     
 
-    
-    float a =0;
-    float b =0;
-    float c =0;
-    float divid = 0.9/FACENUMBER;
+//    
+//    float a =0;
+//    float b =0;
+//    float c =0;
+//    float divid = 0.9/FACENUMBER;
     for (int i=0; i<FACENUMBER; i++) {
 
-        a = i * divid;
-        b = (FACENUMBER-i)/4*divid;
-        c = (FACENUMBER-i)/2*divid;
-        GLfloat ball_mat_ambient[]  = {a, b, c, 1.0f};
-        GLfloat ball_mat_diffuse[]  = {b, a, c, 1.0f};
-        GLfloat ball_mat_specular[] = {c, b, a, 1.0f};
-        GLfloat ball_mat_emission[] = {c, b, a, 1.0f};
-        glMaterialfv(GL_FRONT, GL_AMBIENT,   ball_mat_ambient);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE,   ball_mat_diffuse);
-        glMaterialfv(GL_FRONT, GL_SPECULAR,  ball_mat_specular);
-        glMaterialfv(GL_FRONT, GL_EMISSION,  ball_mat_emission);
-        glMaterialf (GL_FRONT, GL_SHININESS, ball_mat_shininess);
+//        a = i * divid;
+//        b = (FACENUMBER-i)/4*divid;
+//        c = (FACENUMBER-i)/2*divid;
+//        GLfloat ball_mat_ambient[]  = {a, b, c, 1.0f};
+//        GLfloat ball_mat_diffuse[]  = {b, a, c, 1.0f};
+//        GLfloat ball_mat_specular[] = {c, b, a, 1.0f};
+//        GLfloat ball_mat_emission[] = {c, b, a, 1.0f};
+//        glMaterialfv(GL_FRONT, GL_AMBIENT,   ball_mat_ambient);
+//        glMaterialfv(GL_FRONT, GL_DIFFUSE,   ball_mat_diffuse);
+//        glMaterialfv(GL_FRONT, GL_SPECULAR,  ball_mat_specular);
+//        glMaterialfv(GL_FRONT, GL_EMISSION,  ball_mat_emission);
+//        glMaterialf (GL_FRONT, GL_SHININESS, ball_mat_shininess);
         
         
         
@@ -223,10 +254,18 @@ void myDisplay(void)
         int T3 = springMesh.faces[i].pointIndices[2];
         
         if (clothShow) {
+            
+            
+            glBindTexture(GL_TEXTURE_2D, texture.getId());        //使用贴图纹理
             glBegin(GL_TRIANGLES);
+            glTexCoord2f(springMesh.points[T1].textureCoordinate.x, springMesh.points[T1].textureCoordinate.y);
             glVertex3f(springMesh.points[T1].xposition.x, springMesh.points[T1].xposition.y, springMesh.points[T1].xposition.z);
+            glTexCoord2f(springMesh.points[T2].textureCoordinate.x, springMesh.points[T2].textureCoordinate.y);
             glVertex3f(springMesh.points[T2].xposition.x, springMesh.points[T2].xposition.y, springMesh.points[T2].xposition.z);
+            glTexCoord2f(springMesh.points[T3].textureCoordinate.x, springMesh.points[T3].textureCoordinate.y);
             glVertex3f(springMesh.points[T3].xposition.x, springMesh.points[T3].xposition.y, springMesh.points[T3].xposition.z);
+            
+            
             glEnd();
             
         }
@@ -325,9 +364,13 @@ void myDisplay(void)
     }
     
     
+    //DrawCube();
+    
     glFlush();
     glutSwapBuffers();
 }
+
+
 
 
 
@@ -946,6 +989,7 @@ void handleKey(unsigned char key, int x, int y){
 }
 
 
+
 void init() {
     //LoadParameters(ParamFilename);
     // set up camera
@@ -962,13 +1006,13 @@ void init() {
     
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-    
+    glEnable(GL_TEXTURE_2D);
     //Setting lights
     
-    GLfloat light0_position[] = {10.0f, 10.0f, 5.0f, 1.0f}; //spot light
-    GLfloat light1_position[] = {-10.0f, 10.0f,  5.0f, 1.0f};
-    GLfloat light2_position[] = {0.0f, 10.0f, -10.0f, 1.0f};
-    GLfloat light_ambient[]  = {0.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat light0_position[] = {15.0f, 15.0f, 10.0f, 1.0f}; //spot light
+    GLfloat light1_position[] = {-15.0f, 15.0f,  10.0f, 1.0f};
+    GLfloat light2_position[] = {0.0f, 15.0f, -15.0f, 1.0f};
+    GLfloat light_ambient[]  = {0.5f, 0.5f, 0.5f, 1.0f};
     GLfloat light_diffuse[]  = {1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat light_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
      
@@ -1000,6 +1044,11 @@ void init() {
     particles.reserve(ParticleNum);
     fireWorks.reserve(100000);
     srand (time(NULL));
+    
+    texture.loadTGA("/Users/yuyaolong/Desktop/finalProj/clemson.tga");
+    glEnable(GL_CULL_FACE);
+    
+    
     
 }
 

@@ -168,6 +168,7 @@ SpringMesh::SpringMesh(){
     Vector3d Xi[VERTEXNUMBER];
     Vector3d Vi[VERTEXNUMBER];
     Vector3d Fi[VERTEXNUMBER];
+    Vector2d Ti[VERTEXNUMBER];
     for (int i=0; i<LINES; i++) {
         for (int j=0; j<ROWS; j++) {
             //std::cout<<j*EDGELENGTH<<"  "<<i*EDGELENGTH<<"\n";
@@ -185,9 +186,10 @@ SpringMesh::SpringMesh(){
             
             
             Xi[index] = Vector3d(j*EDGELENGTH-((ROWS-1)*EDGELENGTH)/2, MESHHEIGHT, i*EDGELENGTH-((LINES-1)*EDGELENGTH)/2);
+            Ti[index] = Vector2d(j*1.0/(ROWS-1), i*1.0/(LINES-1));
             Vi[index] = Vector3d(0,0,0);
             Fi[index] = Vector3d(0,0,0);
-            points.push_back(Point(mi[index], Xi[index], Vi[index], Fi[index]));
+            points.push_back(Point(mi[index], Xi[index], Vi[index], Fi[index], Ti[index]));
             //std::cout<<Xi[index]<<"\n";
         }
         

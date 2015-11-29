@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E12732051BD9835F00F03E6B /* Particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732031BD9835F00F03E6B /* Particle.cpp */; settings = {ASSET_TAGS = (); }; };
-		E12732081BD9A4BF00F03E6B /* SpringMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732061BD9A4BF00F03E6B /* SpringMesh.cpp */; settings = {ASSET_TAGS = (); }; };
-		E127320B1BD9A54800F03E6B /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732091BD9A54800F03E6B /* Point.cpp */; settings = {ASSET_TAGS = (); }; };
-		E127320E1BD9A58F00F03E6B /* Face.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E127320C1BD9A58F00F03E6B /* Face.cpp */; settings = {ASSET_TAGS = (); }; };
-		E12732111BD9A5DB00F03E6B /* Strut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E127320F1BD9A5DB00F03E6B /* Strut.cpp */; settings = {ASSET_TAGS = (); }; };
+		E12732051BD9835F00F03E6B /* Particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732031BD9835F00F03E6B /* Particle.cpp */; };
+		E12732081BD9A4BF00F03E6B /* SpringMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732061BD9A4BF00F03E6B /* SpringMesh.cpp */; };
+		E127320B1BD9A54800F03E6B /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E12732091BD9A54800F03E6B /* Point.cpp */; };
+		E127320E1BD9A58F00F03E6B /* Face.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E127320C1BD9A58F00F03E6B /* Face.cpp */; };
+		E12732111BD9A5DB00F03E6B /* Strut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E127320F1BD9A5DB00F03E6B /* Strut.cpp */; };
 		E178CF391BAD1E4E008E631A /* gauss.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E178CF371BAD1E4E008E631A /* gauss.cpp */; };
+		E1CDA6521C0AFDE4003E9FC2 /* neheTGATexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1CDA6501C0AFDE4003E9FC2 /* neheTGATexture.cpp */; };
 		E1D1E5FA1BAA7C8600A55BEC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1D1E5F91BAA7C8600A55BEC /* main.cpp */; settings = {COMPILER_FLAGS = "-w"; }; };
 		E1D1E6011BAA7DC100A55BEC /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1D1E6001BAA7DC000A55BEC /* GLUT.framework */; };
 		E1D1E6031BAA7DC800A55BEC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1D1E6021BAA7DC800A55BEC /* OpenGL.framework */; };
@@ -47,6 +48,8 @@
 		E12732101BD9A5DB00F03E6B /* Strut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Strut.h; sourceTree = "<group>"; };
 		E178CF371BAD1E4E008E631A /* gauss.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gauss.cpp; sourceTree = "<group>"; };
 		E178CF381BAD1E4E008E631A /* gauss.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gauss.h; sourceTree = "<group>"; };
+		E1CDA6501C0AFDE4003E9FC2 /* neheTGATexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = neheTGATexture.cpp; sourceTree = "<group>"; };
+		E1CDA6511C0AFDE4003E9FC2 /* neheTGATexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = neheTGATexture.h; sourceTree = "<group>"; };
 		E1D1E5F61BAA7C8600A55BEC /* assignment2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = assignment2; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1D1E5F91BAA7C8600A55BEC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E1D1E6001BAA7DC000A55BEC /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
@@ -111,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				E1D1E5F91BAA7C8600A55BEC /* main.cpp */,
+				E1CDA6501C0AFDE4003E9FC2 /* neheTGATexture.cpp */,
+				E1CDA6511C0AFDE4003E9FC2 /* neheTGATexture.h */,
 				E12732121BD9A5E600F03E6B /* Spring */,
 				E12732031BD9835F00F03E6B /* Particle.cpp */,
 				E12732041BD9835F00F03E6B /* Particle.h */,
@@ -192,6 +197,7 @@
 				E127320E1BD9A58F00F03E6B /* Face.cpp in Sources */,
 				E1D1E60E1BAA7E5000A55BEC /* Matrix.cpp in Sources */,
 				E1D1E6101BAA7E5000A55BEC /* Vector.cpp in Sources */,
+				E1CDA6521C0AFDE4003E9FC2 /* neheTGATexture.cpp in Sources */,
 				E1D1E60D1BAA7E5000A55BEC /* Camera.cpp in Sources */,
 				E1D1E5FA1BAA7C8600A55BEC /* main.cpp in Sources */,
 				E12732081BD9A4BF00F03E6B /* SpringMesh.cpp in Sources */,
