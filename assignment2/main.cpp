@@ -17,6 +17,26 @@
 #include "Particle.h"
 
 
+
+#include <Magick++.h>
+#include "FrameGrabber.h"
+
+using namespace Magick;
+
+static string MYPATH = "/Users/yuyaolong/Desktop/animation";
+static string MYFILENAME = "flagFlock";
+
+#define HDWIDTH	      1920		// HD image dimensions
+#define HDHEIGHT      1080
+#define WIDTH	      (HDWIDTH/2)	// window dimensions = 1/2 HD
+#define HEIGHT	      (HDHEIGHT/2)
+#define STARTFRAME    0
+
+FrameGrabber framegrabber(MYPATH, MYFILENAME, HDWIDTH, HDHEIGHT, STARTFRAME);
+
+int Recording = false;
+
+
 #define automaticSpeed 20
 
 //#define OBSTACLENO 1
@@ -34,20 +54,20 @@
 
 double hStep=0.05;
 
-int WIDTH = 1000;
-int HEIGHT = 800;
+int SCREENWIDTH = 1000;
+int SCREENHEIGHT = 800;
 
 Camera *camera;
 
 bool  resetSign = false;
 bool showGrid = false;
-bool clothShow = false;
+bool clothShow = true;
 bool explode = false;
 SpringMesh springMesh;
 
 
 unsigned int windCount = 0;
-Vector3d gravity(0,0,0);
+Vector3d gravity(0,-1,0);
 
 //particle thing
 int ParticleNum = 150;
@@ -67,6 +87,18 @@ enum calcuState
     FIREWORKCAL
 };
 
+
+Vector4d color[10]={ Vector4d(1.00f, 0.00f, 0.00f, 1.0f),
+                    Vector4d(1.00f, 0.50f, 0.00f, 1.0f),
+                    Vector4d(0.50f, 1.00f, 0.00f, 1.0f),
+                    Vector4d(0.20f, 0.20f, 1.00f, 1.0f),
+                    Vector4d(0.10f, 1.00f, 0.20f, 1.0f),
+                    Vector4d(0.80f, 0.90f, 0.20f, 1.0f),
+                    Vector4d(0.90f, 0.10f, 0.40f, 1.0f),
+                    Vector4d(0.10f, 0.10f, 0.90f, 1.0f),
+                    Vector4d(0.10f, 0.90f, 0.90f, 1.0f),
+                    Vector4d(1.00f, 0.20f, 0.10f, 1.0f)
+};
 
 
 // draws a simple grid
@@ -155,9 +187,9 @@ void particlesGenerator(int number)
 
 void fireWorkGenerator(Vector3d center, unsigned int number)
 {
-    Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
+    unsigned int index = rand()%10;
     for (int i = 0; i<number; i++) {
-        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 5, 1),gauss(0, 5, 1),gauss(0, 5, 1)), Vector3d(0,0,0), color, 1, 0, 2, false,"firework"));
+        fireWorks.push_back(Particle(Vector3d(center.x, center.y, center.z), Vector3d(gauss(0, 5, 1),gauss(0, 5, 1),gauss(0, 5, 1)), Vector3d(0,0,0), color[index], 1, 0, 2, false,"firework"));
         
     }
 }
@@ -173,28 +205,6 @@ void traceGenerator(Vector3d center, unsigned int number)
 
 
 
-int DrawCube(void)
-
-{
-    glBindTexture(GL_TEXTURE_2D, texture.getId());        //使用贴图纹理
-    glPushMatrix();        //压入变换矩阵
-    glBegin(GL_QUADS);  //启用四边形带绘制模式绘制
- 
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-    
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-    
-    glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-    
-    glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-
-    glEnd();
-    
-    glPopMatrix(); //弹出变换矩阵
-    
-    return 1;
-    
-}
 
 void myDisplay(void)
 {
@@ -215,9 +225,9 @@ void myDisplay(void)
      
     //spring mesh
     GLfloat ball_mat_ambient[]  = {0.0f, 0.0f, 0.0f, 1.0f};
-    GLfloat ball_mat_diffuse[]  = {0.4f, 0.2f, 0.5f, 1.0f};
-    GLfloat ball_mat_specular[] = {0.4f, 0.2f, 0.5f, 1.0f};
-    GLfloat ball_mat_emission[] = {0.8f, 0.4f, 1.0f, 1.0f};
+    GLfloat ball_mat_diffuse[]  = {0.7f, 0.7f, 0.7f, 1.0f};
+    GLfloat ball_mat_specular[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    GLfloat ball_mat_emission[] = {0.7f, 0.7f, 0.7f, 1.0f};
     GLfloat ball_mat_shininess  = 8.0f;
     
     glMaterialfv(GL_FRONT, GL_AMBIENT,   ball_mat_ambient);
@@ -227,28 +237,8 @@ void myDisplay(void)
     glMaterialf (GL_FRONT, GL_SHININESS, ball_mat_shininess);
     
 
-//    
-//    float a =0;
-//    float b =0;
-//    float c =0;
-//    float divid = 0.9/FACENUMBER;
     for (int i=0; i<FACENUMBER; i++) {
-
-//        a = i * divid;
-//        b = (FACENUMBER-i)/4*divid;
-//        c = (FACENUMBER-i)/2*divid;
-//        GLfloat ball_mat_ambient[]  = {a, b, c, 1.0f};
-//        GLfloat ball_mat_diffuse[]  = {b, a, c, 1.0f};
-//        GLfloat ball_mat_specular[] = {c, b, a, 1.0f};
-//        GLfloat ball_mat_emission[] = {c, b, a, 1.0f};
-//        glMaterialfv(GL_FRONT, GL_AMBIENT,   ball_mat_ambient);
-//        glMaterialfv(GL_FRONT, GL_DIFFUSE,   ball_mat_diffuse);
-//        glMaterialfv(GL_FRONT, GL_SPECULAR,  ball_mat_specular);
-//        glMaterialfv(GL_FRONT, GL_EMISSION,  ball_mat_emission);
-//        glMaterialf (GL_FRONT, GL_SHININESS, ball_mat_shininess);
-        
-        
-        
+ 
         int T1 = springMesh.faces[i].pointIndices[0];
         int T2 = springMesh.faces[i].pointIndices[1];
         int T3 = springMesh.faces[i].pointIndices[2];
@@ -363,11 +353,6 @@ void myDisplay(void)
         }
     }
     
-    
-    //DrawCube();
-    
-    glFlush();
-    glutSwapBuffers();
 }
 
 
@@ -551,7 +536,7 @@ std::vector<Vector3d> sysDynaFunc(std::vector<Vector3d>& states, const unsigned 
             
             //Vector3d particleAcceleration1((-10 * 1.0/(distance*distance))*Xai);
 
-            statesA[i+pNum] = particleAcceleration + gravity;
+            statesA[i+pNum] = particleAcceleration;
             
         }
         flockAcceleration(states, statesA, pNum);
@@ -567,7 +552,7 @@ std::vector<Vector3d> sysDynaFunc(std::vector<Vector3d>& states, const unsigned 
             double distance  = Xai.norm();
             Vector3d particleAcceleration((-0.001 * (distance*distance))*Xai);
 
-            statesA[i+pNum] = states[i+pNum]*-0.1 + particleAcceleration;
+            statesA[i+pNum] = states[i+pNum]*-0.1 + particleAcceleration + gravity;
         }
     }
     
@@ -811,10 +796,6 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
         }
         
         
-//        if (flockCounter > pNum*1.0/2) {
-//            explode = true;
-//            fireWorkGenerator(particles[i].getPosition(), 100);
-//        }
         
         if (particles[i].getName() == "trace") {
             
@@ -838,7 +819,7 @@ void particlesUpdate(const unsigned int pNum, const calcuState state)
                 if (particles[i].getName() != "trace") {
                     particles[i].setStopSign(false);
                 }
-                Vector4d color(rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX, rand()*1.0/RAND_MAX);
+                Vector4d color(rand()*0.8/RAND_MAX, rand()*0.9/RAND_MAX, rand()*0.7/RAND_MAX, rand()*1.0/RAND_MAX);
                 Vector3d tmp = particles[i].getVelocity();
                 particles[i].setVelocity(Vector3d(tmp.x+gauss(0, 2, 1), tmp.y+gauss(0, 2, 1), tmp.z+gauss(0, 2, 1)));
                 particles[i].setColor(color);
@@ -953,6 +934,12 @@ void handleKey(unsigned char key, int x, int y){
             windCount++;
             break;
             
+        case 'r':			// R -- toggle between recording or not
+        case 'R':
+            Recording = !Recording;
+            glutPostRedisplay();
+            break;
+        
         case 'k':
         case 'K':
             if (t<VERTEXNUMBER && t>0 ) {
@@ -988,6 +975,15 @@ void handleKey(unsigned char key, int x, int y){
     }
 }
 
+
+void doDisplay(){
+    myDisplay();
+    glutSwapBuffers();
+    
+    // recordimage() method needs a pointer to the routine that does all of the drawing
+    if(Recording)
+        framegrabber.recordimage(myDisplay);
+}
 
 
 void init() {
@@ -1042,7 +1038,7 @@ void init() {
 
     
     particles.reserve(ParticleNum);
-    fireWorks.reserve(100000);
+    fireWorks.reserve(1000000);
     srand (time(NULL));
     
     texture.loadTGA("/Users/yuyaolong/Desktop/finalProj/clemson.tga");
@@ -1065,7 +1061,7 @@ int main(int argc, char *argv[])
     
     init();
     
-    glutDisplayFunc(myDisplay);
+    glutDisplayFunc(doDisplay);
     glutMouseFunc(mouseEventHandler);
     glutMotionFunc(motionEventHandler);
     glutKeyboardFunc(handleKey);
